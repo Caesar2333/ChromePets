@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Codex Browser Pet",
+  "version": "0.1.0",
+  "description": "A Codex hatch-pet compatible browser overlay pet using one pet.json and one spritesheet.webp.",
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Codex Browser Pet"
+  },
+  "permissions": ["storage", "tabs", "unlimitedStorage"],
+  "host_permissions": ["<all_urls>"],
+  "web_accessible_resources": [
+    {
+      "resources": ["pets/*/pet.json", "pets/*/spritesheet.webp"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

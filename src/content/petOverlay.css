@@ -1,0 +1,44 @@
+:host {
+  all: initial;
+}
+
+.pet-shell {
+  position: fixed;
+  z-index: 2147483647;
+  width: 192px;
+  height: 208px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  pointer-events: auto;
+  contain: layout style paint;
+}
+
+.pet-shell:active {
+  cursor: grabbing;
+}
+
+.pet-sprite {
+  width: 192px;
+  height: 208px;
+  transform-origin: top left;
+  background-repeat: no-repeat;
+  background-size: 1536px 1872px;
+  image-rendering: auto;
+  pointer-events: auto;
+}
+
+.pet-fallback {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 192px;
+  height: 208px;
+  border: 1px solid rgba(220, 70, 70, 0.55);
+  border-radius: 8px;
+  background: rgba(36, 36, 42, 0.88);
+  color: white;
+  font: 12px/1.35 system-ui, sans-serif;
+  text-align: center;
+  padding: 16px;
+}
