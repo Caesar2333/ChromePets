@@ -46,4 +46,13 @@ desktop.ini
 *.temp
 *.bak
 
-# 
+# Claude Code
+.claude/
+
+# generated output
+output/
+
+# misc notes
+design.md
+prompt.md
+

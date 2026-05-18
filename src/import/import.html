@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Import Browser Pet</title>
+  </head>
+  <body>
+    <main class="import-page">
+      <section class="panel">
+        <p class="eyebrow">Codex Browser Pet</p>
+        <h1>Import Pet Package</h1>
+        <p class="description">
+          Select a standard pet package folder. It must contain only the compatible resource pair:
+          <code>pet.json</code> and <code>spritesheet.webp</code>.
+        </p>
+        <div class="actions">
+          <button id="choose-folder" type="button">Choose Folder</button>
+          <button id="close-page" type="button" class="secondary">Close</button>
+        </div>
+        <input id="folder-input" type="file" multiple hidden />
+        <p id="status" class="status">Ready.</p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

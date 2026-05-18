@@ -1,4 +1,4 @@
-import { BUILT_IN_PETS, DEFAULT_ACTIVE_PET, findBuiltInPet } from "../pet/petCatalog";
+import { DEFAULT_ACTIVE_PET, FALLBACK_BUILT_IN_PETS, findBuiltInPet, getBuiltInPets } from "../pet/petCatalog";
 import type { HatchPetState, PetIdentity, PetSettings } from "../pet/types";
 
 const HATCH_PET_STATES: HatchPetState[] = [
@@ -26,7 +26,7 @@ const DEFAULT_GLOBAL_STATE: PetSettings = {
   enabled: true,
   petId: DEFAULT_ACTIVE_PET.id,
   activePet: DEFAULT_ACTIVE_PET,
-  recentPets: BUILT_IN_PETS.slice(0, 4),
+  recentPets: FALLBACK_BUILT_IN_PETS.slice(0, 4),
   scale: 1,
   animationSpeed: 1,
   position: null,
@@ -41,16 +41,16 @@ function isHatchPetState(value: unknown): value is HatchPetState {
   return typeof value === "string" && HATCH_PET_STATES.includes(value as HatchPetState);
 }
 
-function normalizeState(value: Partial<PetSettings> | undefined): PetSettings {
+function normalizeState(value: Partial<PetSettings> | undefined, builtInPets = FALLBACK_BUILT_IN_PETS): PetSettings {
   const merged = { ...DEFAULT_GLOBAL_STATE, ...(value || {}) };
   const importedPets = normalizeImportedPets(merged.importedPets);
-  const activePet = findAvailablePet(merged.activePet?.id || merged.petId, importedPets);
+  const activePet = findAvailablePet(merged.activePet?.id || merged.petId, importedPets, builtInPets);
 
   return {
     enabled: Boolean(merged.enabled),
     petId: activePet.id,
     activePet,
-    recentPets: BUILT_IN_PETS.slice(0, 4),
+    recentPets: builtInPets.slice(0, 4),
     scale: Math.min(2, Math.max(0.5, Number(merged.scale) || DEFAULT_GLOBAL_STATE.scale)),
     animationSpeed: Math.min(2, Math.max(0.25, Number(merged.animationSpeed) || DEFAULT_GLOBAL_STATE.animationSpeed)),
     position: merged.position && Number.isFinite(merged.position.x) && Number.isFinite(merged.position.y) ? merged.position : null,
@@ -79,19 +79,19 @@ function normalizeImportedPets(value: unknown): PetIdentity[] {
         browserPet: pet.config!.browserPet,
         animations: pet.config!.animations
       }
-    }))
-    .slice(0, 4);
+    }));
 }
 
-function findAvailablePet(petId: string | undefined, importedPets: PetIdentity[]): PetIdentity {
+function findAvailablePet(petId: string | undefined, importedPets: PetIdentity[], builtInPets = FALLBACK_BUILT_IN_PETS): PetIdentity {
   if (!petId) return DEFAULT_ACTIVE_PET;
-  return importedPets.find((pet) => pet.id === petId) || findBuiltInPet(petId);
+  return importedPets.find((pet) => pet.id === petId) || findBuiltInPet(petId, builtInPets);
 }
 
 async function readGlobalState(): Promise<PetSettings> {
+  const builtInPets = await getBuiltInPets();
   const stored = await chrome.storage.local.get(DEFAULT_GLOBAL_STATE as unknown as Record<string, unknown>);
   await migrateLegacyImportedPets(stored as Partial<PetSettings>);
-  const state = normalizeState(stored as Partial<PetSettings>);
+  const state = normalizeState(stored as Partial<PetSettings>, builtInPets);
   await chrome.storage.local.set(state);
   return state;
 }

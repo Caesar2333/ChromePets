@@ -1,32 +1,58 @@
 import type { PetIdentity } from "./types";
 
-export const BUILT_IN_PETS: PetIdentity[] = [
+export const FALLBACK_BUILT_IN_PETS: PetIdentity[] = [
   {
-    id: "wasteland-helper",
-    displayName: "Wasteland Helper",
-    description: "A retro-future wasteland survivor desktop pet."
+    id: "zheng-ke",
+    displayName: "Zheng ke",
+    description: "A compact Codex pet."
   },
   {
-    id: "strangetech",
-    displayName: "StrangeTech",
-    description: "A tiny mystic-tech sorcerer pet."
+    id: "zhang-fei",
+    displayName: "Zhang Fei",
+    description: "A compact Codex pet."
   },
   {
-    id: "wasteland-helper-classic",
-    displayName: "Wasteland Classic",
-    description: "A classic preset variant of the wasteland helper pet."
+    id: "guan-yu",
+    displayName: "Guan Gong",
+    description: "A compact Codex pet."
   },
   {
-    id: "strangetech-focus",
-    displayName: "StrangeTech Focus",
-    description: "A focus preset variant of the mystic-tech sorcerer pet."
+    id: "wasteMan",
+    displayName: "Vault Boy",
+    description: "A cheerful retro vault mascot pet with blond hair, a blue jumpsuit, yellow trim, and task-specific thumbs-up and wrist-computer poses."
   }
 ];
 
-export const DEFAULT_ACTIVE_PET = BUILT_IN_PETS[0];
+export const BUILT_IN_PETS = FALLBACK_BUILT_IN_PETS;
+export const DEFAULT_ACTIVE_PET = FALLBACK_BUILT_IN_PETS[0];
 
-export function findBuiltInPet(petId: string): PetIdentity {
-  return BUILT_IN_PETS.find((pet) => pet.id === petId) || DEFAULT_ACTIVE_PET;
+export async function getBuiltInPets(): Promise<PetIdentity[]> {
+  try {
+    const response = await fetch("/pets/catalog.json");
+    if (!response.ok) return FALLBACK_BUILT_IN_PETS;
+    const pets = (await response.json()) as PetIdentity[];
+    return normalizeBuiltInPets(pets);
+  } catch {
+    return FALLBACK_BUILT_IN_PETS;
+  }
+}
+
+export function normalizeBuiltInPets(value: unknown): PetIdentity[] {
+  if (!Array.isArray(value)) return FALLBACK_BUILT_IN_PETS;
+  const pets = value
+    .filter((pet): pet is PetIdentity => Boolean(pet?.id))
+    .map((pet) => ({
+      id: pet.id,
+      displayName: pet.displayName || pet.id,
+      description: pet.description,
+      source: "built-in" as const,
+      config: pet.config
+    }));
+  return pets.length > 0 ? pets : FALLBACK_BUILT_IN_PETS;
+}
+
+export function findBuiltInPet(petId: string | undefined, builtInPets: PetIdentity[] = FALLBACK_BUILT_IN_PETS): PetIdentity {
+  return builtInPets.find((pet) => pet.id === petId) || builtInPets[0] || DEFAULT_ACTIVE_PET;
 }
 
 export function updateRecentPets(selectedPet: PetIdentity, recentPets: PetIdentity[]): PetIdentity[] {
@@ -37,7 +63,7 @@ export function updateRecentPets(selectedPet: PetIdentity, recentPets: PetIdenti
 export function fillRecentPets(recentPets: PetIdentity[]): PetIdentity[] {
   const seen = new Set(recentPets.map((pet) => pet.id));
   const filled = [...recentPets];
-  for (const pet of BUILT_IN_PETS) {
+  for (const pet of FALLBACK_BUILT_IN_PETS) {
     if (seen.has(pet.id)) continue;
     filled.push(pet);
     seen.add(pet.id);
